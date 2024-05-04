@@ -4,20 +4,25 @@
 // Normally, it's good practice to just do what Clippy tells you, but in this
 // case, we want to keep things relatively simple. The `Default` trait is not the point
 // of this exercise.
+use std::collections::HashMap;
 #[allow(clippy::new_without_default)]
-pub struct School {}
+pub struct School {
+    grades: HashMap<u32, Vec<String>>
+}
 
 impl School {
     pub fn new() -> School {
-        unimplemented!()
+        School { grades: HashMap::new() }
     }
 
     pub fn add(&mut self, grade: u32, student: &str) {
-        unimplemented!("Add {student} to the roster for {grade}")
+        self.grades.entry(grade).or_insert_with(Vec::new).push(student.to_string());
     }
 
     pub fn grades(&self) -> Vec<u32> {
-        unimplemented!()
+        let mut grades = self.grades.keys().cloned().collect::<Vec<u32>>();
+        grades.sort();
+        grades
     }
 
     // If `grade` returned a reference, `School` would be forced to keep a `Vec<String>`
@@ -25,6 +30,8 @@ impl School {
     // the internal structure can be completely arbitrary. The tradeoff is that some data
     // must be copied each time `grade` is called.
     pub fn grade(&self, grade: u32) -> Vec<String> {
-        unimplemented!("Return the list of students in {grade}")
+        let mut students = self.grades.get(&grade).map_or_else(Vec::new, |students| students.clone());
+        students.sort();
+        students
     }
 }
